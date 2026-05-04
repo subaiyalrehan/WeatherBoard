@@ -1,6 +1,6 @@
 import { Star, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { iconForKey } from "@/lib/icons";
+import { WeatherLottie } from "@/components/weather/WeatherLottie";
 import { cToDisplay, formatRelative, tempUnitLabel } from "@/lib/format";
 import { useFavorites, MAX_FAVORITES } from "@/store/favoritesStore";
 import { usePreferences } from "@/store/preferencesStore";
@@ -12,7 +12,6 @@ export function CurrentWeatherCard({ weather }: { weather: Weather }) {
   const { add, remove, has } = useFavorites();
   const isFav = has(weather.city.id);
   const { toast } = useToast();
-  const Icon = iconForKey(weather.current.iconKey);
 
   const toggleFav = () => {
     if (isFav) {
