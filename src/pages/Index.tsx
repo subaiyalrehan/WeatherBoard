@@ -66,6 +66,32 @@ const Index = () => {
     setLastCityId(city.id);
   }, [city.id, setLastCityId]);
 
+  // Keep server-side push subscription in sync with the active city + units
+  // so daily/severe cron notifications reflect what the user is actually viewing.
+  const units = usePreferences((s) => s.units);
+  const notificationHour = usePreferences((s) => s.notificationHourLocal);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const sub = await getActiveSubscription();
+        if (!sub || cancelled) return;
+        await syncSubscription({
+          city,
+          units,
+          notificationHour,
+          dailyEnabled: notificationHour != null,
+          severeEnabled: true,
+        });
+      } catch (e) {
+        console.warn("push sync skipped", e);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [city, units, notificationHour]);
+
   const useGeolocation = () => {
     if (!("geolocation" in navigator)) {
       toast.error("Geolocation isn't supported in this browser.");
