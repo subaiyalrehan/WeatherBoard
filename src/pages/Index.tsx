@@ -19,7 +19,7 @@ import { isOwmConfigured, owmReverseGeocode } from "@/services/openWeatherMap";
 import { openMeteoReverseGeocode } from "@/services/openMeteo";
 import { isGeoDbConfigured } from "@/services/geoDb";
 import { Button } from "@/components/ui/button";
-import { Locate, AlertCircle, RefreshCw, Loader2, ShieldAlert } from "lucide-react";
+import { Locate, AlertCircle, RefreshCw, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const DEFAULT_CITY: City = {
