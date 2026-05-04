@@ -1,4 +1,4 @@
-import { Moon, Sun, Monitor, CloudSun } from "lucide-react";
+import { Moon, Sun, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,9 +16,13 @@ export function Header({ right }: { right?: ReactNode }) {
     <header className="sticky top-0 z-[100] glass border-b">
       <div className="container flex h-16 items-center justify-between gap-3 px-4 md:px-6">
         <div className="flex items-center gap-2">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-sky text-primary-foreground shadow-card">
-            <CloudSun className="h-5 w-5" />
-          </span>
+          <img
+            src="/icons/icon-192.png"
+            alt="WeatherBoard logo"
+            className="h-9 w-9 rounded-xl shadow-card"
+            width={36}
+            height={36}
+          />
           <h1 className="text-lg font-semibold tracking-tight md:text-xl">
             WeatherBoard
           </h1>

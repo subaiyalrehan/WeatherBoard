@@ -1,6 +1,6 @@
 import { Star, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { iconForKey } from "@/lib/icons";
+import { WeatherLottie } from "@/components/weather/WeatherLottie";
 import { cToDisplay, formatRelative, tempUnitLabel } from "@/lib/format";
 import { useFavorites, MAX_FAVORITES } from "@/store/favoritesStore";
 import { usePreferences } from "@/store/preferencesStore";
@@ -12,7 +12,6 @@ export function CurrentWeatherCard({ weather }: { weather: Weather }) {
   const { add, remove, has } = useFavorites();
   const isFav = has(weather.city.id);
   const { toast } = useToast();
-  const Icon = iconForKey(weather.current.iconKey);
 
   const toggleFav = () => {
     if (isFav) {
@@ -57,7 +56,11 @@ export function CurrentWeatherCard({ weather }: { weather: Weather }) {
       </div>
 
       <div className="relative mt-6 flex items-end gap-6">
-        <Icon className="h-20 w-20 drop-shadow-lg md:h-28 md:w-28" strokeWidth={1.5} />
+        <WeatherLottie
+          iconKey={weather.current.iconKey}
+          className="drop-shadow-lg"
+          size={112}
+        />
         <div>
           <div className="text-6xl font-bold leading-none tracking-tight drop-shadow-md md:text-7xl">
             {cToDisplay(weather.current.tempC, units)}
