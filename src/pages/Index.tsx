@@ -125,12 +125,16 @@ const Index = () => {
           setGeoStatus("denied");
           toast.error("Location access blocked", {
             description:
-              "Click the lock icon in your browser's address bar → Permissions → allow Location, then try again.",
+              "Allow location in your browser's site settings (lock icon in the address bar), then try again.",
+            action: { label: "Try again", onClick: () => useGeolocation() },
+            duration: 8000,
           });
         } else {
           setGeoStatus("error");
           toast.error("Couldn't get your location", {
             description: "Check your signal or GPS and retry.",
+            action: { label: "Retry", onClick: () => useGeolocation() },
+            duration: 6000,
           });
         }
       },
