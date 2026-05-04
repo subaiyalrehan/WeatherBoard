@@ -10,6 +10,7 @@ import { HourlyForecast } from "@/components/weather/HourlyForecast";
 import { DailyForecast } from "@/components/weather/DailyForecast";
 import { WeatherSkeleton } from "@/components/weather/WeatherSkeleton";
 import { SettingsDrawer } from "@/components/settings/SettingsDrawer";
+import { InstallButton } from "@/components/layout/InstallButton";
 import { useWeather } from "@/hooks/useWeather";
 import { useTheme } from "@/hooks/useTheme";
 import { usePreferences } from "@/store/preferencesStore";
@@ -148,7 +149,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      <Header right={<SettingsDrawer currentCity={city} />} />
+      <Header right={<><InstallButton /><SettingsDrawer currentCity={city} /></>} />
       <OfflineBanner />
 
       <main className="container px-4 py-6 md:px-6 md:py-10">
