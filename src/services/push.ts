@@ -136,10 +136,28 @@ export async function unsubscribePush(): Promise<void> {
   await supabase.functions.invoke("push-unsubscribe", { body: { endpoint } });
 }
 
-export async function sendTestNotification(): Promise<void> {
-  // Make sure we have a fresh subscription matching the server's VAPID key
-  // before sending the test (resubscribes if a stale one exists).
+export async function sendTestNotification(opts?: {
+  city?: City | null;
+  units?: "metric" | "imperial";
+  notificationHour?: number | null;
+  severeEnabled?: boolean;
+}): Promise<void> {
+  // Ensure we have a sub matching the server's VAPID key, and that the
+  // server has it stored before we ask it to send.
   const sub = await ensureSubscription();
+  await supabase.functions.invoke("push-subscribe", {
+    body: {
+      subscription: subToJSON(sub),
+      city: opts?.city
+        ? { id: opts.city.id, name: opts.city.name, lat: opts.city.lat, lon: opts.city.lon }
+        : null,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      units: opts?.units ?? "metric",
+      notificationHour: opts?.notificationHour ?? null,
+      dailyEnabled: (opts?.notificationHour ?? null) != null,
+      severeEnabled: opts?.severeEnabled ?? true,
+    },
+  });
   const { error } = await supabase.functions.invoke("push-send-test", {
     body: { endpoint: sub.endpoint },
   });
