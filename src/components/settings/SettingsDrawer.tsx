@@ -134,7 +134,7 @@ export function SettingsDrawer({ currentCity = null }: SettingsDrawerProps) {
   })();
 
   return (
-    <Sheet open={open} onOpenChange={setOpen} className="z-[105]">
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" aria-label="Settings">
           <SettingsIcon className="h-5 w-5" />
