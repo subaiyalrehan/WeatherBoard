@@ -22,6 +22,7 @@ import { isGeoDbConfigured } from "@/services/geoDb";
 import { Button } from "@/components/ui/button";
 import { Locate, AlertCircle, RefreshCw, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { getActiveSubscription, syncSubscription } from "@/services/push";
 
 const DEFAULT_CITY: City = {
   id: "51.508,-0.126",
