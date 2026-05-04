@@ -5,7 +5,7 @@ import { formatTime, kphToDisplay, speedUnitLabel } from "@/lib/format";
 
 function Tile({ icon: Icon, label, value }: { icon: typeof Droplets; label: string; value: string }) {
   return (
-    <div className="rounded-2xl border hover:border-primary bg-card p-4 shadow-card transition-all">
+    <div className="rounded-2xl border hover:border-primary hover:bg-accent/60 bg-card p-4 shadow-card transition-all">
       <div className="mb-2 flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
         <Icon className="h-3.5 w-3.5" /> {label}
       </div>
