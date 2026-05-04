@@ -25,7 +25,10 @@ export function SearchBar({ onSelect }: SearchBarProps) {
   const showSuggestions = query.trim().length === 0;
   const suggestionList: City[] = useMemo(() => {
     if (!showSuggestions) return [];
-    return recents.length > 0 ? recents : POPULAR_CITIES;
+    // Mix: recents first, then popular cities (deduped by id), capped at 8.
+    const seen = new Set(recents.map((c) => c.id));
+    const fillers = POPULAR_CITIES.filter((c) => !seen.has(c.id));
+    return [...recents, ...fillers].slice(0, 8);
   }, [showSuggestions, recents]);
 
   const visibleResults: City[] = showSuggestions ? suggestionList : data ?? [];
