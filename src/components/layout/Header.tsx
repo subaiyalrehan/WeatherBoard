@@ -13,7 +13,7 @@ export function Header({ right }: { right?: ReactNode }) {
   const { theme, setTheme } = useTheme();
 
   return (
-    <header className="sticky top-0 z-30 glass border-b">
+    <header className="sticky top-0 z-[100] glass border-b">
       <div className="container flex h-16 items-center justify-between gap-3 px-4 md:px-6">
         <div className="flex items-center gap-2">
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-sky text-primary-foreground shadow-card">
