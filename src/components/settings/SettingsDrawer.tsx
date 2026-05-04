@@ -241,7 +241,7 @@ export function SettingsDrawer({ currentCity = null }: SettingsDrawerProps) {
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-[120]">
                       <SelectItem value="off">Off</SelectItem>
                       {Array.from({ length: 24 }).map((_, h) => (
                         <SelectItem key={h} value={String(h)}>
