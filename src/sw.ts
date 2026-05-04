@@ -87,21 +87,36 @@ self.addEventListener("message", (event) => {
 
 // --- Push Notification Handlers -------------------------------------------
 self.addEventListener("push", (event: any) => {
-  const data = event.data?.json() ?? { title: "WeatherBoard", body: "Check the weather!" };
-  
+  let data: any = { title: "WeatherBoard", body: "Check the weather!" };
+  try {
+    if (event.data) data = { ...data, ...event.data.json() };
+  } catch {
+    /* ignore non-JSON */
+  }
+
+  // Always resolve to absolute URLs so platforms that don't normalize
+  // relative URLs (some Android Chrome builds, Edge) still render the icon.
+  const scope = self.registration.scope; // e.g. https://weatherboard.lovable.app/
+  const iconUrl = data.icon
+    ? new URL(data.icon, scope).toString()
+    : new URL("icons/icon-192.png", scope).toString();
+  const badgeUrl = data.badge
+    ? new URL(data.badge, scope).toString()
+    : iconUrl;
+
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
-      icon: "/icons/icon-192.png",
-      badge: "/icons/icon-192.png",
-      data: { url: "/" },
-    })
+      icon: iconUrl,
+      badge: badgeUrl,
+      tag: data.tag,
+      data: { url: data.url || "/" },
+    }),
   );
 });
 
 self.addEventListener("notificationclick", (event: any) => {
   event.notification.close();
-  event.waitUntil(
-    self.clients.openWindow(event.notification.data.url || "/")
-  );
+  const url = event.notification.data?.url || "/";
+  event.waitUntil(self.clients.openWindow(url));
 });
