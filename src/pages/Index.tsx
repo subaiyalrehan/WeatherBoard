@@ -148,7 +148,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      <Header right={<SettingsDrawer />} />
+      <Header right={<SettingsDrawer currentCity={city} />} />
       <OfflineBanner />
 
       <main className="container px-4 py-6 md:px-6 md:py-10">
@@ -226,7 +226,15 @@ const Index = () => {
       </main>
 
       <footer className="container border-t border-border/60 px-4 pb-8 pt-4 text-center text-xs text-muted-foreground md:px-6">
-        Data: OpenWeatherMap · Open-Meteo · GeoDB Cities
+        Made with <span aria-label="love" className="text-rose-500">♥</span> by{" "}
+        <a
+          href="https://subaiyalrehan.vercel.app"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-medium text-foreground underline-offset-4 hover:underline"
+        >
+          Subaiyal Rehan
+        </a>
       </footer>
     </div>
   );
