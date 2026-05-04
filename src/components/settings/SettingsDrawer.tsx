@@ -140,7 +140,7 @@ export function SettingsDrawer({ currentCity = null }: SettingsDrawerProps) {
           <SettingsIcon className="h-5 w-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent className="overflow-y-auto">
+      <SheetContent className="z-[110] overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Settings</SheetTitle>
           <SheetDescription>Personalize WeatherBoard.</SheetDescription>
