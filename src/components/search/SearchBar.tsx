@@ -25,7 +25,10 @@ export function SearchBar({ onSelect }: SearchBarProps) {
   const showSuggestions = query.trim().length === 0;
   const suggestionList: City[] = useMemo(() => {
     if (!showSuggestions) return [];
-    return recents.length > 0 ? recents : POPULAR_CITIES;
+    // Mix: recents first, then popular cities (deduped by id), capped at 8.
+    const seen = new Set(recents.map((c) => c.id));
+    const fillers = POPULAR_CITIES.filter((c) => !seen.has(c.id));
+    return [...recents, ...fillers].slice(0, 8);
   }, [showSuggestions, recents]);
 
   const visibleResults: City[] = showSuggestions ? suggestionList : data ?? [];
@@ -101,30 +104,6 @@ export function SearchBar({ onSelect }: SearchBarProps) {
 
       {open && (
         <div className="absolute left-0 right-0 top-full z-50 mt-2 w-full rounded-2xl border bg-popover p-1 shadow-elevated">
-          {showSuggestions && (
-            <div className="flex items-center justify-between px-3 pb-1 pt-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-              <span className="flex items-center gap-1.5">
-                {recents.length > 0 ? (
-                  <>
-                    <Clock className="h-3 w-3" /> Recent
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-3 w-3" /> Popular cities
-                  </>
-                )}
-              </span>
-              {recents.length > 0 && (
-                <button
-                  onClick={() => clearRecents()}
-                  className="text-[10px] normal-case tracking-normal text-muted-foreground hover:text-foreground"
-                >
-                  Clear
-                </button>
-              )}
-            </div>
-          )}
-
           {!showSuggestions && isFetching && (
             <div className="flex items-center gap-2 px-3 py-3 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" /> Searching…
@@ -141,31 +120,87 @@ export function SearchBar({ onSelect }: SearchBarProps) {
             </div>
           )}
 
-          {visibleResults.length > 0 && (
+          {showSuggestions ? (
             <ul className="max-h-80 overflow-auto scrollbar-thin">
-              {visibleResults.map((c, i) => (
-                <li key={c.id}>
-                  <button
-                    onMouseEnter={() => setActiveIdx(i)}
-                    onClick={() => pick(c)}
-                    className={cn(
-                      "flex w-full items-start gap-2 rounded-xl px-3 py-2 text-left transition-colors duration-150",
-                      i === activeIdx
-                        ? "bg-accent text-accent-foreground"
-                        : "hover:bg-accent/60",
-                    )}
-                  >
-                    <MapPin className="mt-0.5 h-4 w-4 text-primary" />
-                    <span className="flex-1">
-                      <span className="font-medium">{c.name}</span>
-                      <span className="block text-xs text-muted-foreground">
-                        {[c.region, c.country].filter(Boolean).join(", ")}
-                      </span>
+              {recents.length > 0 && (
+                <li>
+                  <div className="flex items-center justify-between px-3 pb-1 pt-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                    <span className="flex items-center gap-1.5">
+                      <Clock className="h-3 w-3" /> Recent
                     </span>
-                  </button>
+                    <button
+                      onClick={() => clearRecents()}
+                      className="text-[10px] normal-case tracking-normal text-muted-foreground hover:text-foreground"
+                    >
+                      Clear
+                    </button>
+                  </div>
                 </li>
-              ))}
+              )}
+              {visibleResults.map((c, i) => {
+                const isFirstPopular =
+                  recents.length > 0 && i === recents.length;
+                return (
+                  <li key={c.id}>
+                    {isFirstPopular && (
+                      <div className="mt-1 flex items-center gap-1.5 border-t px-3 pb-1 pt-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                        <Sparkles className="h-3 w-3" /> Popular cities
+                      </div>
+                    )}
+                    {i === 0 && recents.length === 0 && (
+                      <div className="flex items-center gap-1.5 px-3 pb-1 pt-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                        <Sparkles className="h-3 w-3" /> Popular cities
+                      </div>
+                    )}
+                    <button
+                      onMouseEnter={() => setActiveIdx(i)}
+                      onClick={() => pick(c)}
+                      className={cn(
+                        "flex w-full items-start gap-2 rounded-xl px-3 py-2 text-left transition-colors duration-150",
+                        i === activeIdx
+                          ? "bg-accent text-accent-foreground"
+                          : "hover:bg-accent/60",
+                      )}
+                    >
+                      <MapPin className="mt-0.5 h-4 w-4 text-primary" />
+                      <span className="flex-1">
+                        <span className="font-medium">{c.name}</span>
+                        <span className="block text-xs text-muted-foreground">
+                          {[c.region, c.country].filter(Boolean).join(", ")}
+                        </span>
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
+          ) : (
+            visibleResults.length > 0 && (
+              <ul className="max-h-80 overflow-auto scrollbar-thin">
+                {visibleResults.map((c, i) => (
+                  <li key={c.id}>
+                    <button
+                      onMouseEnter={() => setActiveIdx(i)}
+                      onClick={() => pick(c)}
+                      className={cn(
+                        "flex w-full items-start gap-2 rounded-xl px-3 py-2 text-left transition-colors duration-150",
+                        i === activeIdx
+                          ? "bg-accent text-accent-foreground"
+                          : "hover:bg-accent/60",
+                      )}
+                    >
+                      <MapPin className="mt-0.5 h-4 w-4 text-primary" />
+                      <span className="flex-1">
+                        <span className="font-medium">{c.name}</span>
+                        <span className="block text-xs text-muted-foreground">
+                          {[c.region, c.country].filter(Boolean).join(", ")}
+                        </span>
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )
           )}
 
           <div className="mt-1 flex items-center justify-between border-t px-3 py-1.5 text-[10px] text-muted-foreground">

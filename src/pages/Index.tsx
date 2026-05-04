@@ -19,7 +19,7 @@ import { isOwmConfigured, owmReverseGeocode } from "@/services/openWeatherMap";
 import { openMeteoReverseGeocode } from "@/services/openMeteo";
 import { isGeoDbConfigured } from "@/services/geoDb";
 import { Button } from "@/components/ui/button";
-import { Locate, AlertCircle, RefreshCw, Loader2, ShieldAlert } from "lucide-react";
+import { Locate, AlertCircle, RefreshCw, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const DEFAULT_CITY: City = {
@@ -99,8 +99,9 @@ const Index = () => {
         }
 
         if (resolved) {
-          // Build a short, readable label: "My Location (Area, City)"
-          const parts = [resolved.region, resolved.name].filter(Boolean) as string[];
+          // Build a short, readable label: "My Location (City, Region)" or "(City, Country)"
+          const secondary = resolved.region || resolved.country;
+          const parts = [resolved.name, secondary].filter(Boolean) as string[];
           const detail = parts.length > 0 ? ` (${parts.join(", ")})` : "";
           setCity({
             ...fallbackCity,
@@ -124,12 +125,16 @@ const Index = () => {
           setGeoStatus("denied");
           toast.error("Location access blocked", {
             description:
-              "Click the lock icon in your browser's address bar → Permissions → allow Location, then try again.",
+              "Allow location in your browser's site settings (lock icon in the address bar), then try again.",
+            action: { label: "Try again", onClick: () => useGeolocation() },
+            duration: 8000,
           });
         } else {
           setGeoStatus("error");
           toast.error("Couldn't get your location", {
             description: "Check your signal or GPS and retry.",
+            action: { label: "Retry", onClick: () => useGeolocation() },
+            duration: 6000,
           });
         }
       },
@@ -172,38 +177,7 @@ const Index = () => {
               </Button>
             </div>
 
-            {/* Reserved slot — prevents layout shift between idle / locating / denied / error states */}
-            <div
-              className="mt-3 min-h-[44px] transition-opacity duration-150"
-              aria-live="polite"
-            >
-              {geoStatus === "denied" && (
-                <div className="flex flex-wrap items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm">
-                  <ShieldAlert className="h-4 w-4 shrink-0 text-destructive" />
-                  <span className="flex-1 text-foreground">
-                    Location is blocked. Allow it in your browser's site settings, then retry.
-                  </span>
-                  <Button size="sm" variant="outline" onClick={useGeolocation}>
-                    <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Try again
-                  </Button>
-                </div>
-              )}
-              {geoStatus === "error" && (
-                <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-muted/40 px-3 py-2 text-sm">
-                  <AlertCircle className="h-4 w-4 shrink-0 text-muted-foreground" />
-                  <span className="flex-1">Couldn't determine your location.</span>
-                  <Button size="sm" variant="outline" onClick={useGeolocation}>
-                    <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Retry
-                  </Button>
-                </div>
-              )}
-              {geoStatus === "locating" && (
-                <div className="flex items-center gap-2 rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
-                  <span>Finding your location…</span>
-                </div>
-              )}
-            </div>
+            {/* Status conveyed via toasts + button label — keeps layout stable, no reserved space. */}
 
             <div className="mt-3">
               <FavoritesBar selectedId={city.id} onSelect={setCity} />
