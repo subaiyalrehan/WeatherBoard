@@ -99,9 +99,12 @@ const Index = () => {
         }
 
         if (resolved) {
+          // Build a short, readable label: "My Location (Area, City)"
+          const parts = [resolved.region, resolved.name].filter(Boolean) as string[];
+          const detail = parts.length > 0 ? ` (${parts.join(", ")})` : "";
           setCity({
             ...fallbackCity,
-            name: resolved.name,
+            name: `My Location${detail}`,
             country: resolved.country,
             region: resolved.region,
           });
@@ -148,7 +151,7 @@ const Index = () => {
           {missing.length > 0 && <MissingKeysCard missing={missing} />}
 
           {/* Control panel — search + my location + favorites grouped */}
-          <section className="rounded-2xl border bg-card/60 p-4 shadow-card backdrop-blur-sm">
+          <section className="relative z-30 rounded-2xl border bg-card/60 p-4 shadow-card">
             <div className="grid gap-3 md:grid-cols-[1fr_auto]">
               <SearchBar onSelect={setCity} />
               <Button
@@ -169,26 +172,38 @@ const Index = () => {
               </Button>
             </div>
 
-            {geoStatus === "denied" && (
-              <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm">
-                <ShieldAlert className="h-4 w-4 shrink-0 text-destructive" />
-                <span className="flex-1 text-foreground">
-                  Location is blocked. Allow it in your browser's site settings, then retry.
-                </span>
-                <Button size="sm" variant="outline" onClick={useGeolocation}>
-                  <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Try again
-                </Button>
-              </div>
-            )}
-            {geoStatus === "error" && (
-              <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-muted/40 px-3 py-2 text-sm">
-                <AlertCircle className="h-4 w-4 shrink-0 text-muted-foreground" />
-                <span className="flex-1">Couldn't determine your location.</span>
-                <Button size="sm" variant="outline" onClick={useGeolocation}>
-                  <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Retry
-                </Button>
-              </div>
-            )}
+            {/* Reserved slot — prevents layout shift between idle / locating / denied / error states */}
+            <div
+              className="mt-3 min-h-[44px] transition-opacity duration-150"
+              aria-live="polite"
+            >
+              {geoStatus === "denied" && (
+                <div className="flex flex-wrap items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm">
+                  <ShieldAlert className="h-4 w-4 shrink-0 text-destructive" />
+                  <span className="flex-1 text-foreground">
+                    Location is blocked. Allow it in your browser's site settings, then retry.
+                  </span>
+                  <Button size="sm" variant="outline" onClick={useGeolocation}>
+                    <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Try again
+                  </Button>
+                </div>
+              )}
+              {geoStatus === "error" && (
+                <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-muted/40 px-3 py-2 text-sm">
+                  <AlertCircle className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <span className="flex-1">Couldn't determine your location.</span>
+                  <Button size="sm" variant="outline" onClick={useGeolocation}>
+                    <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Retry
+                  </Button>
+                </div>
+              )}
+              {geoStatus === "locating" && (
+                <div className="flex items-center gap-2 rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+                  <span>Finding your location…</span>
+                </div>
+              )}
+            </div>
 
             <div className="mt-3">
               <FavoritesBar selectedId={city.id} onSelect={setCity} />
