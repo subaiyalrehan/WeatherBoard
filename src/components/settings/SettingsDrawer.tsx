@@ -181,7 +181,7 @@ export function SettingsDrawer({ currentCity = null }: SettingsDrawerProps) {
             {!support.supported ? (
               <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs">
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
-                <span>{support.reason}</span>
+                <span>{(support as { supported: false; reason: string }).reason}</span>
               </div>
             ) : inIframe ? (
               <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs">
