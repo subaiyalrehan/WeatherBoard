@@ -22,7 +22,7 @@ export function DailyForecast({ weather }: { weather: Weather }) {
           const left = ((d.minC - allMin) / range) * 100;
           const right = ((allMax - d.maxC) / range) * 100;
           return (
-            <li key={d.date} className="flex items-center gap-3 py-2.5">
+            <li key={d.date} className="flex items-center gap-3 rounded-lg px-2 py-2.5 transition-colors duration-150 hover:bg-accent/40">
               <span className="w-12 shrink-0 text-sm font-medium">
                 {i === 0 ? "Today" : formatDay(d.date)}
               </span>
