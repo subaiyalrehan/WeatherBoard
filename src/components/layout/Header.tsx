@@ -13,7 +13,7 @@ export function Header({ right }: { right?: ReactNode }) {
   const { theme, setTheme } = useTheme();
 
   return (
-    <header className="sticky top-0 z-[1] glass border-b">
+    <header className="sticky top-0 z-[31] glass border-b">
       <div className="container flex h-16 items-center justify-between gap-3 px-4 md:px-6">
         <div className="flex items-center gap-2">
           <img
