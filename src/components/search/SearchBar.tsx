@@ -100,7 +100,7 @@ export function SearchBar({ onSelect }: SearchBarProps) {
       </div>
 
       {open && (
-        <div className="absolute z-20 mt-2 w-full rounded-2xl border bg-popover p-1 shadow-elevated">
+        <div className="absolute left-0 right-0 top-full z-50 mt-2 w-full rounded-2xl border bg-popover p-1 shadow-elevated">
           {showSuggestions && (
             <div className="flex items-center justify-between px-3 pb-1 pt-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
               <span className="flex items-center gap-1.5">
