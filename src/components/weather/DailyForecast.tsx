@@ -16,7 +16,7 @@ export function DailyForecast({ weather }: { weather: Weather }) {
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
         7-day forecast
       </h2>
-      <ul className="divide-y">
+      <ul className="space-y-0.5">
         {weather.daily.map((d, i) => {
           const Icon = iconForKey(d.iconKey);
           const left = ((d.minC - allMin) / range) * 100;
