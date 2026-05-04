@@ -24,6 +24,7 @@ A fast, offline-capable weather dashboard PWA with hourly and 7-day forecasts, f
 ## Tech Stack
 
 **Frontend**
+
 - React 18 + TypeScript 5 + Vite 5
 - Tailwind CSS v3 with semantic design tokens (HSL)
 - shadcn/ui (Radix primitives)
@@ -34,11 +35,13 @@ A fast, offline-capable weather dashboard PWA with hourly and 7-day forecasts, f
 - `vite-plugin-pwa` + Workbox (precache + runtime caching strategies)
 
 **Backend (Lovable Cloud / Supabase)**
+
 - Postgres for push subscriptions
 - Deno Edge Functions for VAPID-signed Web Push
 - Scheduled cron functions for daily + severe alerts
 
 **Tooling**
+
 - Vitest + Testing Library + jsdom
 - ESLint 9 (typescript-eslint, react-hooks, react-refresh)
 
@@ -47,11 +50,13 @@ A fast, offline-capable weather dashboard PWA with hourly and 7-day forecasts, f
 ## Setup
 
 ### Prerequisites
+
 - Node.js 20+ (or Bun 1.1+)
 - An OpenWeatherMap API key (optional — Open-Meteo is used as a fallback)
 - A GeoDB Cities API key from RapidAPI (optional — only required for richer city search)
 
 ### 1. Install
+
 ```bash
 bun install
 # or
@@ -59,14 +64,18 @@ npm install
 ```
 
 ### 2. Environment variables
+
 Copy `.env.example` to `.env` and fill in:
+
 ```bash
 VITE_OPENWEATHERMAP_API_KEY=your_openweathermap_key
 VITE_GEODB_API_KEY=your_geodb_rapidapi_key
 ```
+
 The `VITE_SUPABASE_*` variables are auto-provisioned by Lovable Cloud and should not be edited by hand.
 
 ### 3. Run
+
 ```bash
 bun run dev      # http://localhost:8080
 bun run build    # production build
@@ -76,7 +85,9 @@ bun run lint     # ESLint
 ```
 
 ### 4. Push notifications (server-side secrets)
+
 Web Push requires a VAPID keypair stored in the backend:
+
 - `VAPID_PUBLIC_KEY` — base64url, served to the client by `push-vapid-key`
 - `VAPID_PRIVATE_KEY` — base64url, used by edge functions to sign payloads
 - `VAPID_SUBJECT` — `mailto:you@example.com` or your site URL
@@ -90,6 +101,7 @@ Set these in **Lovable Cloud → Settings → Secrets**. Generate a keypair with
 ## Architecture
 
 ### High-level
+
 ```
 ┌────────────────────────┐         ┌────────────────────────────┐
 │  React PWA (client)    │         │  Lovable Cloud (Supabase)  │
@@ -121,6 +133,7 @@ Set these in **Lovable Cloud → Settings → Secrets**. Generate a keypair with
 - **Roles/auth not in scope** — The app is single-user-per-device; push subscriptions are keyed by endpoint, not by an authenticated user.
 
 ### Project layout
+
 ```
 src/
   components/        UI: layout, weather, settings, search, ui (shadcn)
@@ -143,13 +156,13 @@ public/
 
 ## APIs Used
 
-| API | Purpose | Auth | Notes |
-|---|---|---|---|
-| [OpenWeatherMap](https://openweathermap.org/api) — Current, One Call 3.0 | Current + hourly + daily forecast, alerts | API key (`VITE_OPENWEATHERMAP_API_KEY`) | Preferred provider. Free tier supports basic endpoints; One Call 3.0 requires a (free) subscription. |
-| [Open-Meteo](https://open-meteo.com/) | Forecast fallback when OWM key is missing | None | Includes `geocoding-api.open-meteo.com` for city lookup. |
-| [GeoDB Cities](https://rapidapi.com/wirefreethought/api/geodb-cities/) | Rich city autocomplete (population, region, country) | RapidAPI key (`VITE_GEODB_API_KEY`) | Falls back to Open-Meteo geocoding if missing. |
-| Browser Geolocation API | "My Location" pin | User permission | Reverse-geocoded to a human-readable name. |
-| Web Push + Notifications API | Daily + severe alert delivery | VAPID | Server uses Deno WebCrypto to sign and encrypt payloads. |
+| API                                                                      | Purpose                                              | Auth                                    | Notes                                                                                                |
+| ------------------------------------------------------------------------ | ---------------------------------------------------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| [OpenWeatherMap](https://openweathermap.org/api) — Current, One Call 3.0 | Current + hourly + daily forecast, alerts            | API key (`VITE_OPENWEATHERMAP_API_KEY`) | Preferred provider. Free tier supports basic endpoints; One Call 3.0 requires a (free) subscription. |
+| [Open-Meteo](https://open-meteo.com/)                                    | Forecast fallback when OWM key is missing            | None                                    | Includes `geocoding-api.open-meteo.com` for city lookup.                                             |
+| [GeoDB Cities](https://rapidapi.com/wirefreethought/api/geodb-cities/)   | Rich city autocomplete (population, region, country) | RapidAPI key (`VITE_GEODB_API_KEY`)     | Falls back to Open-Meteo geocoding if missing.                                                       |
+| Browser Geolocation API                                                  | "My Location" pin                                    | User permission                         | Reverse-geocoded to a human-readable name.                                                           |
+| Web Push + Notifications API                                             | Daily + severe alert delivery                        | VAPID                                   | Server uses Deno WebCrypto to sign and encrypt payloads.                                             |
 
 ---
 
@@ -163,9 +176,3 @@ public/
 - **Notification icon rendering varies.** Most platforms honor the `icon`/`badge` we send (resolved to absolute URLs in the SW), but a few Android OEM skins still substitute their own glyph.
 - **One language / timezone per device.** Display strings are English; timezone is taken from the browser at subscribe time and re-synced when the user changes city.
 - **No historical data.** Only current conditions and forecasts are shown; there is no time-series archive view.
-
----
-
-## License
-
-This project is private. Lottie animations under `public/lottie/` are from [Meteocons](https://bas.dev/work/meteocons) and are MIT licensed.
