@@ -1,22 +1,9 @@
 import { Settings as SettingsIcon, Bell, BellOff, Thermometer, Send, Loader2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePreferences } from "@/store/preferencesStore";
 import { useEffect, useState } from "react";
 import {
@@ -57,7 +44,9 @@ export function SettingsDrawer({ currentCity = null }: SettingsDrawerProps) {
     getActiveSubscription().then((s) => {
       if (!cancelled) setSubscribed(!!s);
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [support.supported]);
 
   const enableNotifications = async () => {
@@ -118,10 +107,7 @@ export function SettingsDrawer({ currentCity = null }: SettingsDrawerProps) {
   };
 
   // Re-sync server when prefs change while subscribed
-  const savePrefs = async (next: {
-    notificationHour?: number | null;
-    severeEnabled?: boolean;
-  }) => {
+  const savePrefs = async (next: { notificationHour?: number | null; severeEnabled?: boolean }) => {
     if (!subscribed) return;
     setBusy("save");
     try {
@@ -140,11 +126,15 @@ export function SettingsDrawer({ currentCity = null }: SettingsDrawerProps) {
   };
 
   const inIframe = (() => {
-    try { return window.self !== window.top; } catch { return true; }
+    try {
+      return window.self !== window.top;
+    } catch {
+      return true;
+    }
   })();
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet open={open} onOpenChange={setOpen} className="z-[105]">
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" aria-label="Settings">
           <SettingsIcon className="h-5 w-5" />
@@ -187,42 +177,46 @@ export function SettingsDrawer({ currentCity = null }: SettingsDrawerProps) {
               <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs">
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
                 <span>
-                  Push notifications can't be enabled inside the editor preview. Publish your app
-                  and open it in a new tab to enable them.
+                  Push notifications can't be enabled inside the editor preview. Publish your app and open it in a new
+                  tab to enable them.
                 </span>
               </div>
             ) : (
               <>
                 {!subscribed ? (
-                  <Button
-                    className="w-full"
-                    onClick={enableNotifications}
-                    disabled={busy === "enable"}
-                  >
+                  <Button className="w-full" onClick={enableNotifications} disabled={busy === "enable"}>
                     {busy === "enable" ? (
-                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Enabling…</>
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Enabling…
+                      </>
                     ) : (
-                      <><Bell className="mr-2 h-4 w-4" /> Enable notifications</>
+                      <>
+                        <Bell className="mr-2 h-4 w-4" /> Enable notifications
+                      </>
                     )}
                   </Button>
                 ) : (
                   <div className="grid grid-cols-2 gap-2">
                     <Button variant="outline" onClick={sendTest} disabled={busy === "test"}>
                       {busy === "test" ? (
-                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending…</>
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending…
+                        </>
                       ) : (
-                        <><Send className="mr-2 h-4 w-4" /> Test</>
+                        <>
+                          <Send className="mr-2 h-4 w-4" /> Test
+                        </>
                       )}
                     </Button>
-                    <Button
-                      variant="outline"
-                      onClick={disableNotifications}
-                      disabled={busy === "disable"}
-                    >
+                    <Button variant="outline" onClick={disableNotifications} disabled={busy === "disable"}>
                       {busy === "disable" ? (
-                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> …</>
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> …
+                        </>
                       ) : (
-                        <><BellOff className="mr-2 h-4 w-4" /> Disable</>
+                        <>
+                          <BellOff className="mr-2 h-4 w-4" /> Disable
+                        </>
                       )}
                     </Button>
                   </div>
