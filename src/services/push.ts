@@ -1,9 +1,16 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { City } from "@/types/weather";
 
-// Public VAPID key (safe to expose; private key lives in edge function secrets).
-export const VAPID_PUBLIC_KEY =
-  "BNHONLYg7k0sWJA9v35Qb9NVdt5OfaGHssaZ-P_afPIaVrBVn2cYK0LNxTgfLSsiDp34IbWaErhsL4qjdyonSQw";
+let cachedKey: string | null = null;
+
+async function getServerVapidKey(): Promise<string> {
+  if (cachedKey) return cachedKey;
+  const { data, error } = await supabase.functions.invoke("push-vapid-key", { method: "GET" });
+  if (error) throw new Error("Couldn't fetch push key from server");
+  if (!data?.publicKey) throw new Error("Server is missing the push public key");
+  cachedKey = data.publicKey as string;
+  return cachedKey;
+}
 
 export type PushSupport =
   | { supported: true }
@@ -23,7 +30,6 @@ export function getPushSupport(): PushSupport {
   if (!("Notification" in window)) {
     return { supported: false, reason: "Notifications aren't supported in this browser." };
   }
-  // iOS requires the app to be installed (standalone) for push.
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   // @ts-expect-error - non-standard
   const standalone = window.navigator.standalone === true ||
@@ -54,6 +60,16 @@ function subToJSON(sub: PushSubscription) {
   };
 }
 
+function getSubAppServerKey(sub: PushSubscription): string | null {
+  const opts = sub.options as PushSubscriptionOptions;
+  const key = opts?.applicationServerKey;
+  if (!key) return null;
+  const bytes = new Uint8Array(key as ArrayBuffer);
+  let s = "";
+  for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+  return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
 export async function getActiveSubscription(): Promise<PushSubscription | null> {
   const reg = await navigator.serviceWorker.getRegistration();
   if (!reg) return null;
@@ -62,9 +78,17 @@ export async function getActiveSubscription(): Promise<PushSubscription | null> 
 
 export async function ensureSubscription(): Promise<PushSubscription> {
   const reg = await navigator.serviceWorker.ready;
+  const serverKey = await getServerVapidKey();
   const existing = await reg.pushManager.getSubscription();
-  if (existing) return existing;
-  const key = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+  if (existing) {
+    const existingKey = getSubAppServerKey(existing);
+    if (existingKey === serverKey) return existing;
+    // Stale — created with a different VAPID key. Re-create.
+    try {
+      await existing.unsubscribe();
+    } catch { /* ignore */ }
+  }
+  const key = urlBase64ToUint8Array(serverKey);
   return await reg.pushManager.subscribe({
     userVisibleOnly: true,
     applicationServerKey: key.buffer.slice(key.byteOffset, key.byteOffset + key.byteLength) as ArrayBuffer,
@@ -89,12 +113,7 @@ export async function syncSubscription(opts: {
   const payload = {
     subscription: subToJSON(sub),
     city: opts.city
-      ? {
-          id: opts.city.id,
-          name: opts.city.name,
-          lat: opts.city.lat,
-          lon: opts.city.lon,
-        }
+      ? { id: opts.city.id, name: opts.city.name, lat: opts.city.lat, lon: opts.city.lon }
       : null,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     units: opts.units,
@@ -113,15 +132,14 @@ export async function unsubscribePush(): Promise<void> {
   const endpoint = sub.endpoint;
   try {
     await sub.unsubscribe();
-  } catch {
-    /* ignore */
-  }
+  } catch { /* ignore */ }
   await supabase.functions.invoke("push-unsubscribe", { body: { endpoint } });
 }
 
 export async function sendTestNotification(): Promise<void> {
-  const sub = await getActiveSubscription();
-  if (!sub) throw new Error("Not subscribed");
+  // Make sure we have a fresh subscription matching the server's VAPID key
+  // before sending the test (resubscribes if a stale one exists).
+  const sub = await ensureSubscription();
   const { error } = await supabase.functions.invoke("push-send-test", {
     body: { endpoint: sub.endpoint },
   });
