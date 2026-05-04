@@ -137,3 +137,25 @@ export async function getOwmWeather(city: City, signal?: AbortSignal): Promise<W
     provider: "openweathermap",
   };
 }
+
+interface OwmReverseEntry {
+  name: string;
+  country: string;
+  state?: string;
+  local_names?: Record<string, string>;
+}
+
+export async function owmReverseGeocode(
+  lat: number,
+  lon: number,
+  signal?: AbortSignal,
+): Promise<{ name: string; country: string; region?: string } | null> {
+  if (!API_KEY) return null;
+  const url = `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${API_KEY}`;
+  const res = await fetch(url, { signal });
+  if (!res.ok) throw new Error(`OWM reverse ${res.status}`);
+  const list = (await res.json()) as OwmReverseEntry[];
+  const e = list[0];
+  if (!e) return null;
+  return { name: e.name, country: e.country, region: e.state };
+}

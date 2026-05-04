@@ -150,3 +150,21 @@ export async function getOpenMeteoWeather(city: City, signal?: AbortSignal): Pro
     provider: "open-meteo",
   };
 }
+
+interface OmReverseResp {
+  results?: { name: string; country?: string; admin1?: string }[];
+}
+
+export async function openMeteoReverseGeocode(
+  lat: number,
+  lon: number,
+  signal?: AbortSignal,
+): Promise<{ name: string; country: string; region?: string } | null> {
+  const url = `https://geocoding-api.open-meteo.com/v1/reverse?latitude=${lat}&longitude=${lon}&count=1&language=en&format=json`;
+  const res = await fetch(url, { signal });
+  if (!res.ok) throw new Error(`Open-Meteo reverse ${res.status}`);
+  const data = (await res.json()) as OmReverseResp;
+  const r = data.results?.[0];
+  if (!r) return null;
+  return { name: r.name, country: r.country ?? "", region: r.admin1 };
+}
