@@ -28,6 +28,9 @@ Deno.serve(async (req) => {
         title: "WeatherBoard",
         body: `Test notification${sub.city_name ? ` for ${sub.city_name}` : ""} — looks good!`,
         url: "/",
+        icon: "/icons/icon-192.png",
+        badge: "/icons/icon-192.png",
+        tag: "test",
       },
       {
         vapidPublicKey: Deno.env.get("VAPID_PUBLIC_KEY")!,

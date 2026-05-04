@@ -22,6 +22,7 @@ import { isGeoDbConfigured } from "@/services/geoDb";
 import { Button } from "@/components/ui/button";
 import { Locate, AlertCircle, RefreshCw, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { getActiveSubscription, syncSubscription } from "@/services/push";
 
 const DEFAULT_CITY: City = {
   id: "51.508,-0.126",
@@ -64,6 +65,32 @@ const Index = () => {
   useEffect(() => {
     setLastCityId(city.id);
   }, [city.id, setLastCityId]);
+
+  // Keep server-side push subscription in sync with the active city + units
+  // so daily/severe cron notifications reflect what the user is actually viewing.
+  const units = usePreferences((s) => s.units);
+  const notificationHour = usePreferences((s) => s.notificationHourLocal);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const sub = await getActiveSubscription();
+        if (!sub || cancelled) return;
+        await syncSubscription({
+          city,
+          units,
+          notificationHour,
+          dailyEnabled: notificationHour != null,
+          severeEnabled: true,
+        });
+      } catch (e) {
+        console.warn("push sync skipped", e);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [city, units, notificationHour]);
 
   const useGeolocation = () => {
     if (!("geolocation" in navigator)) {
