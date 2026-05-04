@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
 
       const sendRes = await sendWebPush(
         { endpoint: s.endpoint, p256dh: s.p256dh, auth: s.auth },
-        { title, body, url: "/" },
+        { title, body, url: "/", icon: "/icons/icon-192.png", badge: "/icons/icon-192.png", tag: "severe" },
         {
           vapidPublicKey: Deno.env.get("VAPID_PUBLIC_KEY")!,
           vapidPrivateKey: Deno.env.get("VAPID_PRIVATE_KEY")!,
