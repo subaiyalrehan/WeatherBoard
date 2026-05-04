@@ -8,7 +8,7 @@ export function useCitySearch(query: string) {
 
   useEffect(() => {
     if (t.current) window.clearTimeout(t.current);
-    t.current = window.setTimeout(() => setDebounced(query.trim()), 400);
+    t.current = window.setTimeout(() => setDebounced(query.trim()), 200);
     return () => {
       if (t.current) window.clearTimeout(t.current);
     };
@@ -17,7 +17,7 @@ export function useCitySearch(query: string) {
   return useQuery({
     queryKey: ["geodb", debounced],
     queryFn: ({ signal }) => searchCities(debounced, signal),
-    enabled: debounced.length >= 2,
+    enabled: debounced.length >= 1,
     staleTime: 5 * 60 * 1000,
     retry: 0,
   });

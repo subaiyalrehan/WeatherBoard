@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
-import { Loader2, MapPin, Search, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Clock, Loader2, MapPin, Search, Sparkles, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useCitySearch } from "@/hooks/useCitySearch";
+import { useRecentSearches, POPULAR_CITIES } from "@/store/recentSearchesStore";
 import type { City } from "@/types/weather";
 import { cn } from "@/lib/utils";
 
@@ -13,8 +14,25 @@ interface SearchBarProps {
 export function SearchBar({ onSelect }: SearchBarProps) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const [activeIdx, setActiveIdx] = useState(0);
   const wrapRef = useRef<HTMLDivElement>(null);
   const { data, isFetching, error } = useCitySearch(query);
+
+  const recents = useRecentSearches((s) => s.recents);
+  const pushRecent = useRecentSearches((s) => s.push);
+  const clearRecents = useRecentSearches((s) => s.clear);
+
+  const showSuggestions = query.trim().length === 0;
+  const suggestionList: City[] = useMemo(() => {
+    if (!showSuggestions) return [];
+    return recents.length > 0 ? recents : POPULAR_CITIES;
+  }, [showSuggestions, recents]);
+
+  const visibleResults: City[] = showSuggestions ? suggestionList : data ?? [];
+
+  useEffect(() => {
+    setActiveIdx(0);
+  }, [query, open]);
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
@@ -26,8 +44,28 @@ export function SearchBar({ onSelect }: SearchBarProps) {
 
   const pick = (c: City) => {
     onSelect(c);
+    pushRecent(c);
     setQuery("");
     setOpen(false);
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!open) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIdx((i) => Math.min(i + 1, Math.max(0, visibleResults.length - 1)));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIdx((i) => Math.max(i - 1, 0));
+    } else if (e.key === "Enter") {
+      const c = visibleResults[activeIdx];
+      if (c) {
+        e.preventDefault();
+        pick(c);
+      }
+    } else if (e.key === "Escape") {
+      setOpen(false);
+    }
   };
 
   return (
@@ -41,9 +79,12 @@ export function SearchBar({ onSelect }: SearchBarProps) {
             setOpen(true);
           }}
           onFocus={() => setOpen(true)}
+          onKeyDown={onKeyDown}
           placeholder="Search any city…"
-          className="h-12 rounded-2xl pl-10 pr-10 text-base shadow-card"
+          className="h-12 rounded-2xl pl-10 pr-10 text-base shadow-card transition-shadow focus-visible:shadow-elevated"
           aria-label="Search city"
+          aria-autocomplete="list"
+          aria-expanded={open}
         />
         {query && (
           <Button
@@ -58,32 +99,60 @@ export function SearchBar({ onSelect }: SearchBarProps) {
         )}
       </div>
 
-      {open && query.trim().length >= 2 && (
+      {open && (
         <div className="absolute z-20 mt-2 w-full rounded-2xl border bg-popover p-1 shadow-elevated">
-          {isFetching && (
+          {showSuggestions && (
+            <div className="flex items-center justify-between px-3 pb-1 pt-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                {recents.length > 0 ? (
+                  <>
+                    <Clock className="h-3 w-3" /> Recent
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-3 w-3" /> Popular cities
+                  </>
+                )}
+              </span>
+              {recents.length > 0 && (
+                <button
+                  onClick={() => clearRecents()}
+                  className="text-[10px] normal-case tracking-normal text-muted-foreground hover:text-foreground"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+          )}
+
+          {!showSuggestions && isFetching && (
             <div className="flex items-center gap-2 px-3 py-3 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" /> Searching…
             </div>
           )}
-          {error && (
+          {!showSuggestions && error && (
             <div className="px-3 py-3 text-sm text-destructive">
               {(error as Error).message}
             </div>
           )}
-          {!isFetching && !error && data && data.length === 0 && (
+          {!showSuggestions && !isFetching && !error && data && data.length === 0 && (
             <div className="px-3 py-3 text-sm text-muted-foreground">
-              No cities found.
+              No cities found for “{query.trim()}”.
             </div>
           )}
-          {!isFetching && data && data.length > 0 && (
+
+          {visibleResults.length > 0 && (
             <ul className="max-h-80 overflow-auto scrollbar-thin">
-              {data.map((c) => (
+              {visibleResults.map((c, i) => (
                 <li key={c.id}>
                   <button
+                    onMouseEnter={() => setActiveIdx(i)}
                     onClick={() => pick(c)}
                     className={cn(
-                      "flex w-full items-start gap-2 rounded-xl px-3 py-2 text-left",
-                      "hover:bg-accent hover:text-accent-foreground transition-colors",
+                      "flex w-full items-start gap-2 rounded-xl px-3 py-2 text-left transition-colors duration-150",
+                      i === activeIdx
+                        ? "bg-accent text-accent-foreground"
+                        : "hover:bg-accent/60",
                     )}
                   >
                     <MapPin className="mt-0.5 h-4 w-4 text-primary" />
@@ -98,6 +167,10 @@ export function SearchBar({ onSelect }: SearchBarProps) {
               ))}
             </ul>
           )}
+
+          <div className="mt-1 flex items-center justify-between border-t px-3 py-1.5 text-[10px] text-muted-foreground">
+            <span>↑↓ navigate · ↵ select · Esc close</span>
+          </div>
         </div>
       )}
     </div>

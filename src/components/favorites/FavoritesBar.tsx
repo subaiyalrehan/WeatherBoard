@@ -16,7 +16,11 @@ export function FavoritesBar({ selectedId, onSelect }: FavoritesBarProps) {
   if (favorites.length === 0) {
     return (
       <div className="flex items-center gap-2 rounded-2xl border border-dashed bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-        <Star className="h-4 w-4" /> Add up to 5 favorite cities for quick access.
+        <Star className="h-4 w-4" />
+        <span>
+          Add up to 5 favorite cities for quick access.
+          <span className="ml-1 opacity-80">Search a city, then tap ★ Save.</span>
+        </span>
       </div>
     );
   }
@@ -29,10 +33,10 @@ export function FavoritesBar({ selectedId, onSelect }: FavoritesBarProps) {
           <div
             key={c.id}
             className={cn(
-              "group flex shrink-0 items-center rounded-full border bg-card pl-3 pr-1 shadow-card transition-all",
+              "group flex shrink-0 items-center rounded-full border bg-card pl-3 pr-1 shadow-card transition-all duration-200",
               active
                 ? "border-primary/50 bg-accent text-accent-foreground"
-                : "hover:border-primary/30",
+                : "hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-elevated",
             )}
           >
             <button
