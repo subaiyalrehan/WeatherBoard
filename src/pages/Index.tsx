@@ -99,8 +99,9 @@ const Index = () => {
         }
 
         if (resolved) {
-          // Build a short, readable label: "My Location (Area, City)"
-          const parts = [resolved.region, resolved.name].filter(Boolean) as string[];
+          // Build a short, readable label: "My Location (City, Region)" or "(City, Country)"
+          const secondary = resolved.region || resolved.country;
+          const parts = [resolved.name, secondary].filter(Boolean) as string[];
           const detail = parts.length > 0 ? ` (${parts.join(", ")})` : "";
           setCity({
             ...fallbackCity,
