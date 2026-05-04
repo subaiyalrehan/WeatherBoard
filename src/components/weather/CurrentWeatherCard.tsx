@@ -26,20 +26,20 @@ export function CurrentWeatherCard({ weather }: { weather: Weather }) {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-gradient-sky p-6 text-primary-foreground shadow-elevated md:p-8">
+    <div className="relative overflow-hidden rounded-2xl bg-gradient-sky p-6 text-[hsl(var(--hero-foreground))] shadow-elevated ring-1 ring-white/10 md:p-8">
       <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/15 blur-2xl" />
       <div className="absolute -bottom-20 -left-10 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
 
       <div className="relative flex flex-wrap items-start justify-between gap-4">
         <div>
-          <div className="flex items-center gap-1.5 text-sm/none opacity-90">
+          <div className="flex items-center gap-1.5 text-sm/none font-medium">
             <MapPin className="h-3.5 w-3.5" />
             {weather.city.name}
-            <span className="opacity-75">
+            <span className="opacity-90">
               {[weather.city.region, weather.city.country].filter(Boolean).join(", ")}
             </span>
           </div>
-          <div className="mt-1 text-xs opacity-75">
+          <div className="mt-1 text-xs opacity-90">
             Updated {formatRelative(weather.fetchedAt)} · via{" "}
             {weather.provider === "openweathermap" ? "OpenWeatherMap" : "Open-Meteo"}
           </div>
@@ -49,7 +49,7 @@ export function CurrentWeatherCard({ weather }: { weather: Weather }) {
           variant="ghost"
           size="sm"
           onClick={toggleFav}
-          className="rounded-full bg-white/15 text-primary-foreground hover:bg-white/25"
+          className="rounded-full bg-white/20 text-[hsl(var(--hero-foreground))] backdrop-blur-sm hover:bg-white/30 hover:text-[hsl(var(--hero-foreground))]"
         >
           <Star className={`mr-1.5 h-4 w-4 ${isFav ? "fill-current" : ""}`} />
           {isFav ? "Saved" : "Save"}
@@ -59,13 +59,13 @@ export function CurrentWeatherCard({ weather }: { weather: Weather }) {
       <div className="relative mt-6 flex items-end gap-6">
         <Icon className="h-20 w-20 drop-shadow-lg md:h-28 md:w-28" strokeWidth={1.5} />
         <div>
-          <div className="text-6xl font-bold leading-none tracking-tight md:text-7xl">
+          <div className="text-6xl font-bold leading-none tracking-tight drop-shadow-md md:text-7xl">
             {cToDisplay(weather.current.tempC, units)}
-            <span className="text-3xl font-semibold opacity-80 md:text-4xl">
+            <span className="text-3xl font-semibold opacity-90 md:text-4xl">
               {tempUnitLabel(units)}
             </span>
           </div>
-          <div className="mt-1 text-lg opacity-90">
+          <div className="mt-1 text-lg font-medium opacity-95 drop-shadow-sm">
             {weather.current.conditionLabel} · feels like{" "}
             {cToDisplay(weather.current.feelsLikeC, units)}
             {tempUnitLabel(units)}
