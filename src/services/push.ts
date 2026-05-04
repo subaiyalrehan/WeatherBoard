@@ -102,6 +102,15 @@ export async function requestPermission(): Promise<NotificationPermission> {
   return await Notification.requestPermission();
 }
 
+function cleanCityName(c: City): string {
+  // "My Location (Karachi, Sindh)" -> "Karachi, Sindh"
+  const m = c.name?.match(/\(([^)]+)\)/);
+  if (m) return m[1];
+  // Otherwise prefer "Name, Region" or "Name, Country"
+  const secondary = c.region || c.country;
+  return secondary ? `${c.name}, ${secondary}` : c.name;
+}
+
 export async function syncSubscription(opts: {
   city: City | null;
   units: "metric" | "imperial";
@@ -113,7 +122,7 @@ export async function syncSubscription(opts: {
   const payload = {
     subscription: subToJSON(sub),
     city: opts.city
-      ? { id: opts.city.id, name: opts.city.name, lat: opts.city.lat, lon: opts.city.lon }
+      ? { id: opts.city.id, name: cleanCityName(opts.city), lat: opts.city.lat, lon: opts.city.lon }
       : null,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     units: opts.units,
