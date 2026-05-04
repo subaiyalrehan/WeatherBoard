@@ -64,9 +64,10 @@ export async function ensureSubscription(): Promise<PushSubscription> {
   const reg = await navigator.serviceWorker.ready;
   const existing = await reg.pushManager.getSubscription();
   if (existing) return existing;
+  const key = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
   return await reg.pushManager.subscribe({
     userVisibleOnly: true,
-    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+    applicationServerKey: key.buffer.slice(key.byteOffset, key.byteOffset + key.byteLength) as ArrayBuffer,
   });
 }
 
