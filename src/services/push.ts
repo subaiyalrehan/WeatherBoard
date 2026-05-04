@@ -158,7 +158,7 @@ export async function sendTestNotification(opts?: {
     body: {
       subscription: subToJSON(sub),
       city: opts?.city
-        ? { id: opts.city.id, name: opts.city.name, lat: opts.city.lat, lon: opts.city.lon }
+        ? { id: opts.city.id, name: cleanCityName(opts.city), lat: opts.city.lat, lon: opts.city.lon }
         : null,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       units: opts?.units ?? "metric",
