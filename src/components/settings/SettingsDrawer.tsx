@@ -97,7 +97,12 @@ export function SettingsDrawer({ currentCity = null }: SettingsDrawerProps) {
   const sendTest = async () => {
     setBusy("test");
     try {
-      await sendTestNotification();
+      await sendTestNotification({
+        city: currentCity,
+        units,
+        notificationHour,
+        severeEnabled,
+      });
       toast.success("Test push sent — check your notifications");
     } catch (e) {
       toast.error("Test failed", { description: (e as Error).message });
